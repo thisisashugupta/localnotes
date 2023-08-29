@@ -8,14 +8,16 @@ function App() {
 
   const [items, setItems] = useState("cooking");
 
-  useEffect(() => {
-    localStorage.setItem("items-1234", JSON.stringify(items));
-  }, [items]);
+  // useEffect(() => {
+  //   localStorage.setItem("items-1234", JSON.stringify(items));
+  // }, [items]);
 
-  const addtolocalstorage = async () => {
+  const addtolocalstorage = async (e) => {
+    e.preventDefault();
     console.log(newNote);
     // add to local storage
     setNotes((notes) => [...notes, newNote]);
+    localStorage.setItem("items-1234", JSON.stringify(newNote));
     setNewNote("");
   };
 
@@ -23,17 +25,17 @@ function App() {
     <>
       <div>Title Header</div>
       <div>
-        <input
-          type="text"
-          name="newNote"
-          id="newNote"
-          onChange={(e) => {
-            setNewNote(e.target.value);
-          }}
-        />
-        <button type="submit" onClick={addtolocalstorage}>
-          Add Note
-        </button>
+        <form onSubmit={addtolocalstorage}>
+          <input
+            type="text"
+            name="newNote"
+            id="newNote"
+            onChange={(e) => {
+              setNewNote(e.target.value);
+            }}
+          />
+          <button type="submit">Add Note</button>
+        </form>
       </div>
       <div className="card">
         <div>
