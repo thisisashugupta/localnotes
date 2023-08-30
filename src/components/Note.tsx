@@ -1,15 +1,22 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-const Note: React.FC<{ text: string }> = ({ text }) => {
-  const [note, setNote] = useState<string>(text);
+const Note: React.FC<{ localkey: string }> = ({ localkey, setItems }) => {
 
-  useEffect(() => {
-    setNote(text);
-  }, []);
+  function deleteNote(e:Event) {
+    e.preventDefault();
+    // remove item from local storage with key = localkey
+    localStorage.removeItem(localkey);
+    console.log(localStorage.getItem(e.target?.note.value), "deleted");
+    setItems({ ...localStorage });
+  }
 
   return (
     <>
-      <div>{note}</div>
+      <div>{localStorage.getItem(localkey)}</div>
+      <form onSubmit={deleteNote}>
+      <input type="text" name="note" id="note" defaultValue={localkey} hidden/>
+      <button type="submit">dlt</button>
+      </form>
     </>
   );
 };

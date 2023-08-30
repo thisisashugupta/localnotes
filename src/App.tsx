@@ -1,35 +1,46 @@
 import { useState, useEffect } from "react";
 import "./App.css";
 import Note from "./components/Note";
+import { v4 as uuidv4 } from 'uuid';
 
-function App() {
-  const [notes, setNotes] = useState([]);
+export default function App() {
+  const [localkey, setLocalKey] = useState(uuidv4());
   const [newNote, setNewNote] = useState("");
+  const [items, setItems] = useState({ ...localStorage });
+  const [allKeys, setAllKeys] = useState<(string | null)[]>(Object.keys(localStorage));
 
-  const [items, setItems] = useState("cooking");
+/*
+    let i = keys.length;
+    while (i--) {
+      values.push(localStorage.getItem(keys[i]));
+    }
+     return keys;
+*/
 
-  // useEffect(() => {
-  //   localStorage.setItem("items-1234", JSON.stringify(items));
-  // }, [items]);
+  useEffect(() => {
+      setAllKeys(Object.keys(localStorage));
+  }, [items]);
 
-  const addtolocalstorage = async (e) => {
+  async function addtolocalstorage(e:Event) {    
     e.preventDefault();
-    console.log(newNote);
+    console.log(newNote," added");
     // add to local storage
-    setNotes((notes) => [...notes, newNote]);
-    localStorage.setItem("items-1234", JSON.stringify(newNote));
+    localStorage.setItem(localkey, newNote);
+    setItems({ ...localStorage });
     setNewNote("");
-  };
+    setLocalKey(uuidv4());
+  }
 
   return (
     <>
-      <div>Title Header</div>
+      <div><h2>welcome to localnotes</h2></div>
       <div>
         <form onSubmit={addtolocalstorage}>
           <input
             type="text"
             name="newNote"
             id="newNote"
+            required
             onChange={(e) => {
               setNewNote(e.target.value);
             }}
@@ -37,19 +48,20 @@ function App() {
           <button type="submit">Add Note</button>
         </form>
       </div>
+      <p>// show notes //</p>
       <div className="card">
         <div>
-          {notes.map((note, index) => (
-            <div key={index}>
-              <Note text={note} />
-            </div>
-          ))}
+          {
+            allKeys.map(
+              (localkey, index) => (
+                <div key={index}>
+                  <Note localkey={localkey} setItems={setItems}/>
+                </div>
+              )
+            )
+          }
         </div>
-
-        <Note text={"some random text"} />
       </div>
     </>
   );
 }
-
-export default App;
