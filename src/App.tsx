@@ -1,46 +1,68 @@
-import { useState, useEffect } from "react";
-import "./App.css";
-import Note from "./components/Note";
+"use client"
+
+import { useEffect, useState } from "react";
 import { v4 as uuidv4 } from 'uuid';
+import Tasks from "./components/Task";
+
+type TaskType = {
+  body: string;
+  order: number;
+  done: boolean;
+  id: string;
+}
 
 export default function App() {
-  const [localkey, setLocalKey] = useState(uuidv4());
+  const [allTaskGroups, setAllTaskGroups] = useState(localStorage.getItem("localnotes"));
   const [newNote, setNewNote] = useState("");
-  const [items, setItems] = useState({ ...localStorage });
-  const [allKeys, setAllKeys] = useState<(string | null)[]>(Object.keys(localStorage));
-
-/*
-    let i = keys.length;
-    while (i--) {
-      values.push(localStorage.getItem(keys[i]));
-    }
-     return keys;
-*/
+  const [notes, setNotes] = useState(localStorage.getItem("localnotes"));
 
   useEffect(() => {
-      setAllKeys(Object.keys(localStorage));
-  }, [items]);
+    if (!localStorage.getItem("localnotes")) {
+      localStorage.setItem("localnotes", JSON.stringify([]));
+    }
+  }
+  , []);
 
-  async function addtolocalstorage(e:Event) {    
+  async function addtolocalstorage(e: React.FormEvent<HTMLFormElement>) {    
     e.preventDefault();
-    console.log(newNote," added");
+
+    const allNotes = JSON.parse(notes!);
+
+    const note = {
+      "body": newNote,
+      "order": allNotes.length + 1,
+      "done": false,
+      "id": uuidv4()
+    }
+
+    const tg = {
+      "title": newNote,
+      "order": JSON.parse(allTaskGroups!).length + 1,
+      "tasks": [note],
+      "tg_id": uuidv4()
+    }
+
+    const allNewNotes = [ ...allNotes, note ];
+
+    const allNewTaskGroups = [ ...JSON.parse(allTaskGroups!), tg ];
+
+    console.log(allNewTaskGroups);
+    
     // add to local storage
-    localStorage.setItem(localkey, newNote);
-    setItems({ ...localStorage });
-    setNewNote("");
-    setLocalKey(uuidv4());
+    localStorage.setItem("localnotes", JSON.stringify(allNewTaskGroups));
+    setNotes(localStorage.getItem("localnotes"));
   }
 
   return (
-    <>
+    <main className="max-h-screen max-w-screen">
       <div><h2>welcome to localnotes</h2></div>
       <div>
         <form onSubmit={addtolocalstorage}>
-          <input
-            type="text"
+          <textarea
             name="newNote"
             id="newNote"
             required
+            value={newNote}
             onChange={(e) => {
               setNewNote(e.target.value);
             }}
@@ -48,20 +70,23 @@ export default function App() {
           <button type="submit">Add Note</button>
         </form>
       </div>
-      <p>// show notes //</p>
-      <div className="card">
-        <div>
-          {
-            allKeys.map(
-              (localkey, index) => (
-                <div key={index}>
-                  <Note localkey={localkey} setItems={setItems}/>
-                </div>
-              )
-            )
-          }
-        </div>
+      
+      <div className="bg-red-500">
+        {JSON.parse(notes!).map((note: any) => 
+          <div key={uuidv4()}>
+            <div>{`${note.body}`}</div>
+            <div>{note.order}</div>
+          </div>
+        )}
       </div>
-    </>
+
+      <div>
+        {JSON.parse(allTaskGroups!).map((tg: any) => 
+        <div key={uuidv4()}>
+          <Tasks tasks={JSON.stringify(tg.tasks)} />
+        </div>
+        )}
+      </div>
+    </main>
   );
 }
